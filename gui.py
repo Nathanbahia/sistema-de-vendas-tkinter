@@ -1,108 +1,466 @@
 from tkinter import *
+from classes import *
+from bancodedados import *
+
+user = Usuario(nome='nathan', senha='123')
+banco = Banco()
 
 
-class App:
-    width = 700
-    height = 480    
-    bg1 = "#3066be"
-    bg2 = "#119da4"
-    bg3 = "#6d9dc5"
-    bg4 = "#80ded9"
-    bg5 = "#aeecef"    
-    fonte_grande = "Verdana 22 bold"
-    fonte_botao = "Verdana 12"
-    fonte_label = "Verdana 10"
-
+class App:    
     def __init__(self):
-        self.master = Tk()
-        self.master.configure(background=App.bg3)
-        self.master.title("Gerenciamento de Vendas")
-        self.master.geometry(f"{App.width}x{App.height}+100+100")
-        self.master.columnconfigure(0, weight=int(App.width/10))        
-        self.master.columnconfigure(1, weight=int(App.width/10))        
-        self.master.columnconfigure(2, weight=int(App.width/10))        
-        self.master.columnconfigure(3, weight=int(App.width/10))        
-        self.master.columnconfigure(4, weight=int(App.width/10))        
-        self.master.columnconfigure(5, weight=int(App.width/10))        
-        self.master.columnconfigure(6, weight=int(App.width/10))        
-        self.master.columnconfigure(7, weight=int(App.width/10))        
-        self.master.columnconfigure(8, weight=int(App.width/10))        
-        self.master.columnconfigure(9, weight=int(App.width/10))
+        self.bgPadrao = "#484848"
+        self.fgPadrao = "#dddddd"
 
-        self.master.rowconfigure(0, weight=int(App.height/10))
-        self.master.rowconfigure(1, weight=int(App.height/10))
-        self.master.rowconfigure(2, weight=int(App.height/10))
-        self.master.rowconfigure(3, weight=int(App.height/10))
-        self.master.rowconfigure(4, weight=int(App.height/10))
-        self.master.rowconfigure(5, weight=int(App.height/10))
-        self.master.rowconfigure(6, weight=int(App.height/10))
-        self.master.rowconfigure(7, weight=int(App.height/10))
-        self.master.rowconfigure(8, weight=int(App.height/10))
-        self.master.rowconfigure(9, weight=int(App.height/10))                
+        self.temaClaro = "#cccccc"
+        self.temaEscuro = "#484848"
 
-        """ Título da Janela """
-        self.lbl_title = Label(
-            self.master, 
-            text="Meu Negócio",
-            font=App.fonte_grande,
-            bg=App.bg3
-        )
-        self.lbl_title.grid(row=0, column=0, columnspan=10, sticky=NS)
-
+        self.width = 640
+        self.height = 480
         
-        """ Menu """
+        self.master = Tk()
+        self.master.title("Python")
+        self.master.geometry(f"{self.width}x{self.height}")
+        self.master.resizable(False, False)
+        self.master.configure(background=self.bgPadrao)
+
+        self.criaTitulo("")
 
         self.menu = Menu(self.master)
         self.master.config(menu=self.menu)
-        self.menu_produtos = Menu(self.menu, tearoff=False)
-        self.menu_clientes = Menu(self.menu, tearoff=False)
-        self.menu_vendas = Menu(self.menu, tearoff=False)
-        self.menu_usuarios = Menu(self.menu, tearoff=False)
-        self.menu_configuracoes = Menu(self.menu, tearoff=False)
 
-        self.menu.add_cascade(label="Produtos", menu=self.menu_produtos)
-        self.menu.add_cascade(label="Clientes", menu=self.menu_clientes)
-        self.menu.add_cascade(label="Vendas", menu=self.menu_vendas)
-        self.menu.add_cascade(label="Usuários", menu=self.menu_usuarios)
-        self.menu.add_cascade(label="Configurações", menu=self.menu_configuracoes)
+        self.menuGeral = Menu(self.menu, tearoff=False)        
+        self.menu.add_cascade(label="Geral", menu=self.menuGeral)        
+        self.menuGeral.add_command(label="Clientes", command=self.clientes)
+        self.menuGeral.add_command(label="Produtos", command=self.produtos)
+        self.menuGeral.add_command(label="Vendas", command=self.vendas)
+        self.menuGeral.add_command(label="Estoque", command=self.estoques)
+
+        self.menuConfig = Menu(self.menu, tearoff=False)        
+        self.menu.add_cascade(label="Configurações", menu=self.menuConfig)        
+        self.temaConfig = Menu(self.menuConfig, tearoff=False)                
+        self.menuConfig.add_cascade(label="Tema", menu=self.temaConfig)                
+        self.temaConfig.add_command(label="Claro", command=lambda: self.alteraTema("claro"))
+        self.temaConfig.add_command(label="Escuro", command=lambda: self.alteraTema("escuro"))                
         
-        self.menu_produtos.add_command(label="Cadastrar", command=self.cadastrar_produto)
-        self.menu_produtos.add_command(label="Consultar", command=self.consultar)        
+        self.menuSobre = Menu(self.menu, tearoff=False)        
+        self.menu.add_cascade(label="Sobre", menu=self.menuSobre)        
+        self.menuSobre.add_command(label="Desenvolvedor", command=self.sobre)        
 
-        self.menu_clientes.add_command(label="Cadastrar", command=self.consultar)
-        self.menu_clientes.add_command(label="Consultar", command=self.consultar)        
+        self.menuSair = Menu(self.menu, tearoff=False)        
+        self.menu.add_cascade(label="Sair", menu=self.menuSair)        
+        self.menuSair.add_command(label="Sair", command=lambda:self.master.destroy())
 
-        self.menu_vendas.add_command(label="Nova", command=self.consultar)
-        self.menu_vendas.add_command(label="Histórico", command=self.consultar)
 
-    # PRODUTOS
+    def criaTitulo(self, texto):
+        Label(
+            self.master,
+            text="NBDev Desenvolvimento de Sistemas",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao,
+            font="Helvetica 24 bold").place(x=0, y=0, w=self.width)
+        Label(
+            self.master,
+            text=texto,
+            bg=self.bgPadrao,
+            fg=self.fgPadrao,
+            font="Helvetica 16 bold").place(x=0, y=50, w=self.width)
+
+    def clientes(self):
+        self.limpaTela()
+        self.criaTitulo("Cadastro de Clientes")
+
+        # NOME
+        Label(
+            self.master,
+            text="Nome: ",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).place(x=20, y=100)
+        ent_nome = Entry(self.master).place(x=100, y=100, w=500)
+
+        # ENDEREÇO
+        Label(
+            self.master,
+            text="Endereço: ",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).place(x=20, y=140)
+        ent_endereco = Entry(self.master).place(x=100, y=140, w=500)        
+
+        # TELEFONE        
+        Label(
+            self.master,
+            text="Telefone: ",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).place(x=20, y=180)
+        ent_telefone = Entry(self.master).place(x=100, y=180, w=200, h=20)
+
+        # EMAIL
+        Label(
+            self.master,
+            text="E-mail: ",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).place(x=320, y=180)
+        ent_email = Entry(self.master).place(x=400, y=180, w=200)              
+
+        # BOTÃO CONFIRMA
+        btn_confirma = Button(
+            self.master,
+            text="Cadastrar",
+            bg="#5858FA",
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0
+            ).place(x=110, y=220, w=200)
+
+        # BOTÃO PROCURA
+        btn_procura = Button(
+            self.master,
+            text="Buscar",
+            bg="#2E9AFE",
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0
+            ).place(x=330, y=220, w=200)
+
+        # LISTBOX
+        listbox = Listbox(
+            self.master,
+            borderwidth=2)
+        listbox.config(height=10)
+        listbox.place(x=20, y=260, w=600)
+
+        # BOTÃO EDITAR
+        btn_procura = Button(
+            self.master,
+            text="Editar",
+            bg="#FE2E2E",
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0
+            ).place(x=220, y=440, w=200)
+
+    def produtos(self):
+        self.limpaTela()
+        self.criaTitulo("Cadastro de Produtos")
+
+        # NOME
+        Label(
+            self.master,
+            text="Nome: ",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).place(x=20, y=100)
+        ent_nome = Entry(self.master).place(x=100, y=100, w=500)
+
+        # CATEGORIA
+        Label(
+            self.master,
+            text="Categoria: ",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).place(x=20, y=140)
+
+        cat = StringVar()
+        CATEGORIAS = banco.show_all_categorias()
+        ent_categoria = OptionMenu(
+            self.master,
+            cat,
+            *CATEGORIAS            
+            )
+        ent_categoria["highlightthickness"]=0
+        ent_categoria["borderwidth"]=0
+        ent_categoria["anchor"]="w"
+        ent_categoria.place(x=100, y=140, w=150, h=20)
+
+        # BOTÃO ADICIONAR SEÇÃO
+        Button(
+            self.master,
+            text="+",
+            bg="#FE2E2E",
+            fg="#FFFFFF",
+            borderwidth=0,
+            command=self.categorias).place(x=260, y=140, w=40, h=20)        
+
+        # QUANTIDADE
+        uni = StringVar()
+        UNIDADES = ['Unidade', 'Quilo']
+        Label(
+            self.master,
+            text="Unidade: ",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).place(x=320, y=140)
+        ent_unidade = OptionMenu(
+            self.master,
+            uni,
+            *UNIDADES
+            )
+        ent_unidade["highlightthickness"]=0
+        ent_unidade["borderwidth"]=0
+        ent_unidade["anchor"]="w"
+        ent_unidade.place(x=400, y=140, w=200, h=20)
+
+        # CUSTO
+        Label(
+            self.master,
+            text="Quantidade: ",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).place(x=20, y=180)
+        ent_quantidade = Entry(self.master).place(x=100, y=180, w=200)
+
+        # UNIDADE
+        Label(
+            self.master,
+            text="Custo: ",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).place(x=320, y=180)
+        ent_custo = Entry(self.master).place(x=400, y=180, w=200)        
+
+        # BOTÃO CONFIRMA
+        btn_confirma = Button(
+            self.master,
+            text="Cadastrar",
+            bg="#5858FA",
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0
+            ).place(x=110, y=220, w=200)
+
+        # BOTÃO PROCURA
+        btn_procura = Button(
+            self.master,
+            text="Buscar",
+            bg="#2E9AFE",
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0
+            ).place(x=330, y=220, w=200)
+
+        # LISTBOX
+        listbox = Listbox(
+            self.master,
+            borderwidth=2)
+        listbox.config(height=10)
+        listbox.place(x=20, y=260, w=600)
+
+        # BOTÃO EDITAR
+        btn_procura = Button(
+            self.master,
+            text="Editar",
+            bg="#FE2E2E",
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0,            
+            ).place(x=220, y=440, w=200)
+
+    def categorias(self):
+        self.limpaTela()
+        self.criaTitulo("Cadastro de Seções")
+
+        # NOME
+        Label(
+            self.master,
+            text="Nome: ",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).place(x=20, y=100)
+        ent_nome = Entry(self.master)
+        ent_nome.place(x=100, y=100, w=500)
     
-    def cadastrar_produto(self):
-        self.lbl_nome = Label(self.master, text="Nome", font=App.fonte_label).grid(column=1, row=2, sticky=E)
-        self.lbl_categoria = Label(self.master, text="Categoria", font=App.fonte_label).grid(column=1, row=3, sticky=E)
-        self.lbl_quantidade = Label(self.master, text="Quantidade", font=App.fonte_label).grid(column=1, row=4, sticky=E)
-        self.lbl_unidade = Label(self.master, text="Unidade", font=App.fonte_label).grid(column=1, row=5, sticky=E)
+        # BOTÃO CONFIRMA
+        btn_confirma = Button(
+            self.master,
+            text="Cadastrar",
+            bg="#5858FA",
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0,
+            command=lambda: banco.create_categoria(nome=ent_nome.get(), user=user)
+            ).place(x=110, y=140, w=200)
 
-        self.ent_nome = Entry(self.master, font=App.fonte_label).grid(column=3, row=2, sticky=W)
-        self.ent_categoria = Entry(self.master, font=App.fonte_label).grid(column=3, row=3, sticky=W)
-        self.ent_quantidade = Entry(self.master, font=App.fonte_label).grid(column=3, row=4, sticky=W)
-        self.ent_unidade = Entry(self.master, font=App.fonte_label).grid(column=3, row=5, sticky=W)
+        # BOTÃO PROCURA
+        btn_procura = Button(
+            self.master,
+            text="Buscar",
+            bg="#2E9AFE",
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0
+            ).place(x=330, y=140, w=200)
 
+        # LISTBOX
+        listbox = Listbox(
+            self.master,
+            borderwidth=2)
+        listbox.config(height=15)
+        listbox.place(x=20, y=180, w=600)
 
-    def consultar(self):
-        print("Consulta banco de dados")
+        # BOTÃO EDITAR
+        btn_procura = Button(
+            self.master,
+            text="Editar",
+            bg="#FE2E2E",
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0
+            ).place(x=220, y=440, w=200)
 
-
-
-
-               
-
-
+    def estoques(self):
+        self.limpaTela()
+        self.criaTitulo("Estoques")
         
+        # CATEGORIAS
+        Label(
+            self.master,
+            text="Categoria: ",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).place(x=20, y=100)
+
+        cat = StringVar()
+        CATEGORIAS = ['Açougue','Padaria','Hortifruti']
+        ent_categoria = OptionMenu(
+            self.master,
+            cat,
+            *CATEGORIAS            
+            )
+        ent_categoria["highlightthickness"]=0
+        ent_categoria["borderwidth"]=0
+        ent_categoria["anchor"]="w"
+        ent_categoria.place(x=100, y=100, w=500, h=20)
+
+        # LISTBOX
+        listbox = Listbox(
+            self.master,
+            borderwidth=2)
+        listbox.config(height=20)
+        listbox.place(x=20, y=140, w=600)
+
+    def vendas(self):
+        self.limpaTela()
+        self.criaTitulo("Vendas")
+
+        # CLIENTE
+        Label(
+            self.master,
+            text="Cliente: ",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).place(x=20, y=100)
+        ent_nome = Entry(self.master).place(x=100, y=100, w=430)
+
+        # BOTÃO BUSCAR CLIENTE
+        Button(
+            self.master,
+            text="Buscar",
+            bg="#FE2E2E",
+            fg="#cccccc",
+            borderwidth=0,
+            font="Helvetica 9 bold",            
+        ).place(x=540, y=100, w=50, h=20)
+
+        # PRODUTO
+        Label(
+            self.master,
+            text="Produtos: ",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).place(x=20, y=140)
+        ent_produto = Entry(self.master).place(x=100, y=140, w=250)   
+
+        # BOTÃO BUSCAR PRODUTO
+        Button(
+            self.master,
+            text="Buscar",
+            bg="#FE2E2E",
+            fg="#cccccc",
+            borderwidth=0,
+            font="Helvetica 9 bold",
+        ).place(x=360, y=140, w=50, h=20)             
+
+        # QUANTIDADE        
+        Label(
+            self.master,
+            text="Quantidade: ",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).place(x=420, y=140)
+        ent_quantidade = Entry(self.master).place(x=500, y=140, w=90, h=20)
+
+        # BOTAO ADICIONAR
+        btn_confirma = Button(
+            self.master,
+            text="Cadastrar",
+            bg="#5858FA",
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0
+            ).place(x=220, y=180, w=200)        
+
+        # LISTBOX
+        listbox = Listbox(
+            self.master,
+            borderwidth=2)
+        listbox.config(height=12)
+        listbox.place(x=20, y=220, w=600)
+
+        # BOTAO REMOVER PRODUTO        
+        btn_procura = Button(
+            self.master,
+            text="Remover",
+            bg="#FE2E2E",
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0
+            ).place(x=110, y=440, w=200)
+
+        # BOTAO FINALIZAR VENDA      
+        btn_procura = Button(
+            self.master,
+            text="Finalizar",
+            bg="#FE2E2E",
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0
+            ).place(x=330, y=440, w=200)            
+
+    def limpaTela(self):
+        for widget in self.master.winfo_children():
+            if not isinstance(widget, Menu):
+                widget.destroy()    
+
+    def alteraTema(self, tema):
+        if tema == "claro":
+            self.bgPadrao = self.temaClaro
+            self.fgPadrao = self.temaEscuro
+        elif tema == "escuro":
+            self.bgPadrao = self.temaEscuro
+            self.fgPadrao = self.temaClaro
+
+        self.master.configure(background=self.bgPadrao)
+        for widget in self.master.winfo_children():
+            if isinstance(widget, Label):
+                widget['bg'] = self.bgPadrao
+                widget['fg'] = self.fgPadrao
+        
+    def sobre(self):
+        self.limpaTela()
+        Label(
+            self.master,
+            text="Versão 0.1 - Sitema de Gerenciamento de Vendas",
+            font="Helvetica 14 bold",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).pack()
+
+        Label(
+            self.master,
+            text="Desenvolvido por NBDev Desenvolvimento de Sistemas",
+            font="Helvetica 12",
+            bg=self.bgPadrao,
+            fg=self.fgPadrao).pack()
+
+        img = PhotoImage(file="imagens/python.png")
+        logo = Label(
+            self.master,            
+            image=img,            
+            bg=self.bgPadrao)
+        logo.image = img
+        logo.place(x=0, y=120, w=self.width)
 
     def run(self):
         self.master.mainloop()
-
+              
 
 if __name__ == "__main__":
     app = App()

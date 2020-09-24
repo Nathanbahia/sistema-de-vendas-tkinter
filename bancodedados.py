@@ -29,28 +29,26 @@ class Banco:
         """
         self.cursor.execute(query)
         self.conn.commit()
-        print("Tabela criada com sucesso!")
+        print("Tabela de categorias criada com sucesso!")
 
     def show_all_categorias(self):
         """
         Função que exibe todas as categorias cadastradas no bando de dados
         """
-
+        lista_categorias = []
         query = "SELECT * FROM categorias WHERE ativa=1"
-        categorias = self.cursor.execute(query)        
+        categorias = self.cursor.execute(query)                
         for cat in categorias.fetchall():
-            indice = cat[0]
-            secao = Categoria(nome=cat[1], usuario=cat[4])
-            secao.criacao = cat[2]
-            secao.alteracao = cat[3]            
-            print(indice, secao)
+            indice, nome, criacao, alteracao = cat[:4]
+            lista_categorias.append((indice, nome, criacao, alteracao))            
+        return lista_categorias
 
-    def create_categoria(self, user):
+    def create_categoria(self, nome, user):
         """
         Função que cria um novo registro de categoria no banco de dados
         """
 
-        nome = input("Digite o nome da seção: ")
+        #nome = input("Digite o nome da seção: ")
         secao = Categoria(nome=nome, usuario=user)
         query = f"INSERT INTO categorias (nome, criacao, alteracao, criador, alterador, \
 ativa) VALUES ('{secao.nome}', '{secao.criacao}', '{secao.alteracao}', '{secao.usuario}', \
@@ -58,7 +56,7 @@ ativa) VALUES ('{secao.nome}', '{secao.criacao}', '{secao.alteracao}', '{secao.u
 
         self.cursor.execute(query)
         self.conn.commit()
-        print("Seção criada com sucesso!")
+        print(f"Seção {nome} criada com sucesso!")
 
     def select_categoria(self):
         """
@@ -103,7 +101,47 @@ alterador='{user}' WHERE id = {indice}"
         self.conn.commit()
         print("Seção removida com sucesso!")
 
+
+    ### PRODUTO
+
+    def create_table_produtos(self):
+        """
+        Função que cria a tabela de produtos nos banco de dados
+        caso ainda não exista quando este arquivo for executado.
+        """
+
+        query = """
+        CREATE TABLE IF NOT EXISTS produtos (
+            id INTEGER PRIMARY KEY,
+            nome TEXT NOT NULL,
+            categoria TEXT NOT NULL,
+            quantidade REAL NOT NULL,
+            unidade TEXT NOT NULL,            
+            criacao TEXT NOT NULL,
+            alteracao TEXT NOT NULL,
+            criador TEXT NOT NULL,
+            alterador TEXT NOT NULL,
+            ativa INTEGER NOT NULL
+        )
+        """
+        self.cursor.execute(query)
+        self.conn.commit()
+        print("Tabela de produtos criada com sucesso!")
+
+
+    def create_produto(self, nome, categoria, quantidade, unidade, usuario):
+        data = datetime.now().date()
+        query = f"""
+        INSERT INTO produtos (nome, categoria, quantidade, unidade, criacao, \
+alteracao, criador, alterador, ativa) VALUES ('{nome}', '{categoria}', {quantidade}, \
+'{unidade}', '{data}', '{data}', '{usuario}', '{usuario}', 1)        
+        """
+        self.cursor.execute(query)
+        self.conn.commit()
+        print(f"Produto {nome} cadastrado com sucesso!")
+
         
 if __name__ == "__main__":
     banco = Banco()
     banco.create_table_categorias()
+    banco.create_table_produtos()
