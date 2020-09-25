@@ -2,6 +2,7 @@ from tkinter import *
 from classes import *
 from bancodedados import *
 
+
 user = Usuario(nome='nathan', senha='123')
 banco = Banco()
 
@@ -13,6 +14,10 @@ class App:
 
         self.temaClaro = "#cccccc"
         self.temaEscuro = "#484848"
+
+        self.bgButtonConfirm = "#115293"
+        self.bgButtonSearch = "#d32f2f"
+        self.bgButtonEdit = "#388e3c"
 
         self.width = 640
         self.height = 480
@@ -75,7 +80,17 @@ class App:
             text="Nome: ",
             bg=self.bgPadrao,
             fg=self.fgPadrao).place(x=20, y=100)
-        ent_nome = Entry(self.master).place(x=100, y=100, w=500)
+        ent_nome = Entry(self.master).place(x=100, y=100, w=440)
+
+        # BOTÃO PROCURA
+        btn_procura = Button(
+            self.master,
+            text="Buscar",
+            bg=self.bgButtonSearch,
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0
+            ).place(x=550, y=100, w=50, h=20)        
 
         # ENDEREÇO
         Label(
@@ -105,21 +120,11 @@ class App:
         btn_confirma = Button(
             self.master,
             text="Cadastrar",
-            bg="#5858FA",
+            bg=self.bgButtonConfirm,
             fg="#cccccc",
             font="Helvetica 9 bold",
             borderwidth=0
-            ).place(x=110, y=220, w=200)
-
-        # BOTÃO PROCURA
-        btn_procura = Button(
-            self.master,
-            text="Buscar",
-            bg="#2E9AFE",
-            fg="#cccccc",
-            font="Helvetica 9 bold",
-            borderwidth=0
-            ).place(x=330, y=220, w=200)
+            ).place(x=220, y=220, w=200)
 
         # LISTBOX
         listbox = Listbox(
@@ -132,7 +137,7 @@ class App:
         btn_procura = Button(
             self.master,
             text="Editar",
-            bg="#FE2E2E",
+            bg=self.bgButtonEdit,
             fg="#cccccc",
             font="Helvetica 9 bold",
             borderwidth=0
@@ -148,7 +153,17 @@ class App:
             text="Nome: ",
             bg=self.bgPadrao,
             fg=self.fgPadrao).place(x=20, y=100)
-        ent_nome = Entry(self.master).place(x=100, y=100, w=500)
+        ent_nome = Entry(self.master).place(x=100, y=100, w=440)
+
+        # BOTÃO PROCURA
+        btn_procura = Button(
+            self.master,
+            text="Buscar",
+            bg=self.bgButtonSearch,
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0
+            ).place(x=550, y=100, w=50, h=20)       
 
         # CATEGORIA
         Label(
@@ -158,8 +173,8 @@ class App:
             fg=self.fgPadrao).place(x=20, y=140)
 
         cat = StringVar()
-        CATEGORIAS = banco.show_all_categorias()
-        CATEGORIAS.append('SEM CATEGORIAS CADASTRADAS') if len(CATEGORIAS) == 0 else print("OK")    
+        CATEGORIAS = [CAT[1] for CAT in banco.show_all_categorias()]
+        CATEGORIAS.append('SEM CATEGORIAS') if len(CATEGORIAS) == 0 else print("OK")    
         ent_categoria = OptionMenu(
             self.master,
             cat,
@@ -174,7 +189,7 @@ class App:
         Button(
             self.master,
             text="+",
-            bg="#FE2E2E",
+            bg=self.bgButtonConfirm,
             fg="#FFFFFF",
             borderwidth=0,
             command=self.categorias).place(x=260, y=140, w=40, h=20)        
@@ -213,25 +228,15 @@ class App:
             fg=self.fgPadrao).place(x=320, y=180)
         ent_custo = Entry(self.master).place(x=400, y=180, w=200)        
 
-        # BOTÃO CONFIRMA
+        # BOTÃO CADASTRO
         btn_confirma = Button(
             self.master,
             text="Cadastrar",
-            bg="#5858FA",
+            bg=self.bgButtonConfirm,
             fg="#cccccc",
             font="Helvetica 9 bold",
             borderwidth=0
-            ).place(x=110, y=220, w=200)
-
-        # BOTÃO PROCURA
-        btn_procura = Button(
-            self.master,
-            text="Buscar",
-            bg="#2E9AFE",
-            fg="#cccccc",
-            font="Helvetica 9 bold",
-            borderwidth=0
-            ).place(x=330, y=220, w=200)
+            ).place(x=220, y=220, w=200)
 
         # LISTBOX
         listbox = Listbox(
@@ -244,13 +249,17 @@ class App:
         btn_procura = Button(
             self.master,
             text="Editar",
-            bg="#FE2E2E",
+            bg=self.bgButtonEdit,
             fg="#cccccc",
             font="Helvetica 9 bold",
             borderwidth=0,            
             ).place(x=220, y=440, w=200)
 
     def categorias(self):
+        def cria_categoria():
+            banco.create_categoria(nome=ent_nome.get(), user=user)
+            self.produtos()
+            
         self.limpaTela()
         self.criaTitulo("Cadastro de Seções")
 
@@ -261,28 +270,28 @@ class App:
             bg=self.bgPadrao,
             fg=self.fgPadrao).place(x=20, y=100)
         ent_nome = Entry(self.master)
-        ent_nome.place(x=100, y=100, w=500)
-    
-        # BOTÃO CONFIRMA
-        btn_confirma = Button(
-            self.master,
-            text="Cadastrar",
-            bg="#5858FA",
-            fg="#cccccc",
-            font="Helvetica 9 bold",
-            borderwidth=0,
-            command=lambda: banco.create_categoria(nome=ent_nome.get(), user=user)
-            ).place(x=110, y=140, w=200)
+        ent_nome.place(x=100, y=100, w=440)
 
         # BOTÃO PROCURA
         btn_procura = Button(
             self.master,
             text="Buscar",
-            bg="#2E9AFE",
+            bg=self.bgButtonSearch,
             fg="#cccccc",
             font="Helvetica 9 bold",
             borderwidth=0
-            ).place(x=330, y=140, w=200)
+            ).place(x=550, y=100, w=50, h=20)        
+    
+        # BOTÃO CONFIRMA
+        btn_confirma = Button(
+            self.master,
+            text="Cadastrar",
+            bg=self.bgButtonConfirm,
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0,
+            command=cria_categoria
+            ).place(x=220, y=140, w=200)
 
         # LISTBOX
         listbox = Listbox(
@@ -295,7 +304,7 @@ class App:
         btn_procura = Button(
             self.master,
             text="Editar",
-            bg="#FE2E2E",
+            bg=self.bgButtonEdit,
             fg="#cccccc",
             font="Helvetica 9 bold",
             borderwidth=0
@@ -341,17 +350,17 @@ class App:
             text="Cliente: ",
             bg=self.bgPadrao,
             fg=self.fgPadrao).place(x=20, y=100)
-        ent_nome = Entry(self.master).place(x=100, y=100, w=430)
+        ent_nome = Entry(self.master).place(x=100, y=100, w=440)
 
         # BOTÃO BUSCAR CLIENTE
         Button(
             self.master,
             text="Buscar",
-            bg="#FE2E2E",
+            bg=self.bgButtonSearch,
             fg="#cccccc",
             borderwidth=0,
             font="Helvetica 9 bold",            
-        ).place(x=540, y=100, w=50, h=20)
+        ).place(x=550, y=100, w=50, h=20)
 
         # PRODUTO
         Label(
@@ -365,7 +374,7 @@ class App:
         Button(
             self.master,
             text="Buscar",
-            bg="#FE2E2E",
+            bg=self.bgButtonSearch,
             fg="#cccccc",
             borderwidth=0,
             font="Helvetica 9 bold",
@@ -386,8 +395,8 @@ class App:
         # BOTAO ADICIONAR
         btn_confirma = Button(
             self.master,
-            text="Cadastrar",
-            bg="#5858FA",
+            text="Adicionar Produto",
+            bg=self.bgButtonConfirm,
             fg="#cccccc",
             font="Helvetica 9 bold",
             borderwidth=0
@@ -404,7 +413,7 @@ class App:
         btn_procura = Button(
             self.master,
             text="Remover",
-            bg="#FE2E2E",
+            bg=self.bgButtonEdit,
             fg="#cccccc",
             font="Helvetica 9 bold",
             borderwidth=0
@@ -414,7 +423,7 @@ class App:
         btn_procura = Button(
             self.master,
             text="Finalizar",
-            bg="#FE2E2E",
+            bg=self.bgButtonConfirm,
             fg="#cccccc",
             font="Helvetica 9 bold",
             borderwidth=0
