@@ -1,6 +1,6 @@
 from tkinter import *
-from classes import *
-from bancodedados import *
+from backend.classes import *
+from backend.bancodedados import *
 
 user = Usuario(nome='nathan', senha='123')
 banco = Banco()
@@ -376,7 +376,11 @@ class App:
             text="Quantidade: ",
             bg=self.bgPadrao,
             fg=self.fgPadrao).place(x=420, y=140)
-        ent_quantidade = Entry(self.master).place(x=500, y=140, w=90, h=20)
+        ent_quantidade = Spinbox(
+            self.master,
+            from_=0,
+            to=100,
+        ).place(x=500, y=140, w=90, h=20)
 
         # BOTAO ADICIONAR
         btn_confirma = Button(
