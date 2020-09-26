@@ -7,6 +7,78 @@ user = Usuario(nome='nathan', senha='123')
 banco = Banco()
 
 
+class Tabela:
+    def __init__(self, frame, posx, posy, colunas, header):
+        self.master = frame
+        self.posx = posx
+        self.posy = posy
+        self.largura_total = 600
+        self.larg_colunas = []
+        """
+        colunas: lista de dicionários que devem conter os elementos
+        a serem apresentados na tabela. A quantidade de chaves de cada
+        dicionário deve ser igual a quantidade de chaves do header.            
+        
+        Exemplo:
+        colunas = [                
+            {
+                'nome': 'fulano',                    
+                'telefone': "24999991234"
+            },
+            {
+                'nome': 'fulano',                    
+                'telefone': "24999991234"
+            },                                    
+        ]
+
+        header: cabeçalho da tabela. Deve conter os seguintes valores:
+        chave: titulo da coluna
+        valor: largura da coluna em %, que devem somar 1
+            
+        Exemplo:
+        header={
+            'ID': .1,
+            'Nome': .4,
+            'Telefone': .2,
+            'E-mail': .3,                
+        }
+        """
+
+        # CABEÇALHO
+        x = self.posx
+        for h in header:
+            Label(
+                self.master,
+                text=h.upper(),
+                borderwidth=1,
+                relief="groove",
+                bg="#388e3c", 
+                font="Helvetica 8 bold",
+            ).place(x=x, y=posy, w=self.largura_total*header[h], h=20)
+            x += self.largura_total*header[h]
+            self.larg_colunas.append(self.largura_total*header[h])
+        self.posy += 20
+        
+        # CORPO        
+        x = self.posx
+        indice = 0            
+        for elemento in colunas:
+            for dados in elemento:
+                Label(
+                    self.master,
+                    text=str(elemento[dados]).upper(),
+                    borderwidth=1,
+                    relief="groove",   
+                    anchor=W,
+                    font="Helvetica 9",                 
+                ).place(x=x, y=self.posy, w=self.larg_colunas[indice], h=20)
+                x += self.larg_colunas[indice]
+                indice += 1
+            indice = 0
+            x = self.posx                            
+            self.posy += 20
+
+
 class App:    
     def __init__(self):
         self.bgPadrao = "#484848"
@@ -55,6 +127,12 @@ class App:
         self.menu.add_cascade(label="Sair", menu=self.menuSair)        
         self.menuSair.add_command(label="Sair", command=lambda:self.master.destroy())
 
+        # CONTROLE DAS TABELAS
+        self.cliente_start = 0
+        self.cliente_end = 7
+
+        self.categoria_start = 0
+        self.categoria_end = 11
 
     def criaTitulo(self, texto):
         Label(
@@ -70,7 +148,39 @@ class App:
             fg=self.fgPadrao,
             font="Helvetica 16 bold").place(x=0, y=50, w=self.width)
 
-    def clientes(self):
+    def clientes(self, busca=None):
+        def create_cliente():
+            banco.create_cliente(
+                nome=ent_nome.get(),
+                telefone=ent_telefone.get(),
+                email=ent_email.get(),
+                endereco=ent_endereco.get()
+            )
+            self.clientes()
+
+        def pagina_contatos_proxima():
+            if self.cliente_end <= len(banco.show_all_clientes()):
+                self.cliente_start += 7
+                self.cliente_end += 7
+                self.clientes()
+            else:
+                btn_next["state"] = DISABLED
+                btn_next["bg"] = "#cccccc"
+
+        def pagina_contatos_anterior():
+            if self.cliente_start >= 7:
+                self.cliente_start -= 7
+                self.cliente_end -= 7
+                self.clientes()            
+            else:
+                btn_prev["state"] = DISABLED
+                btn_prev["bg"] = "#cccccc"
+
+        def busca_cliente():
+            busca = banco.busca_cliente(ent_nome.get())                
+            self.clientes(busca)
+
+
         self.limpaTela()
         self.criaTitulo("Cadastro de Clientes")
 
@@ -79,8 +189,9 @@ class App:
             self.master,
             text="Nome: ",
             bg=self.bgPadrao,
-            fg=self.fgPadrao).place(x=20, y=100)
-        ent_nome = Entry(self.master).place(x=100, y=100, w=440)
+            fg=self.fgPadrao).place(x=20, y=100),            
+        ent_nome = Entry(self.master)
+        ent_nome.place(x=100, y=100, w=440)
 
         # BOTÃO PROCURA
         btn_procura = Button(
@@ -89,8 +200,10 @@ class App:
             bg=self.bgButtonSearch,
             fg="#cccccc",
             font="Helvetica 9 bold",
-            borderwidth=0
-            ).place(x=550, y=100, w=50, h=20)        
+            borderwidth=0,
+            command=busca_cliente
+            )
+        btn_procura.place(x=550, y=100, w=50, h=20)        
 
         # ENDEREÇO
         Label(
@@ -98,7 +211,8 @@ class App:
             text="Endereço: ",
             bg=self.bgPadrao,
             fg=self.fgPadrao).place(x=20, y=140)
-        ent_endereco = Entry(self.master).place(x=100, y=140, w=500)        
+        ent_endereco = Entry(self.master)
+        ent_endereco.place(x=100, y=140, w=500)        
 
         # TELEFONE        
         Label(
@@ -106,7 +220,8 @@ class App:
             text="Telefone: ",
             bg=self.bgPadrao,
             fg=self.fgPadrao).place(x=20, y=180)
-        ent_telefone = Entry(self.master).place(x=100, y=180, w=200, h=20)
+        ent_telefone = Entry(self.master)
+        ent_telefone.place(x=100, y=180, w=200, h=20)
 
         # EMAIL
         Label(
@@ -114,7 +229,8 @@ class App:
             text="E-mail: ",
             bg=self.bgPadrao,
             fg=self.fgPadrao).place(x=320, y=180)
-        ent_email = Entry(self.master).place(x=400, y=180, w=200)              
+        ent_email = Entry(self.master)
+        ent_email.place(x=400, y=180, w=200)              
 
         # BOTÃO CONFIRMA
         btn_confirma = Button(
@@ -123,15 +239,24 @@ class App:
             bg=self.bgButtonConfirm,
             fg="#cccccc",
             font="Helvetica 9 bold",
-            borderwidth=0
+            borderwidth=0,
+            command=create_cliente,
             ).place(x=220, y=220, w=200)
 
-        # LISTBOX
-        listbox = Listbox(
-            self.master,
-            borderwidth=2)
-        listbox.config(height=10)
-        listbox.place(x=20, y=260, w=600)
+        # TABELA 
+        tabela = Tabela(
+            frame=self.master,
+            posx=20,
+            posy=260,            
+            header={
+                'ID': .1,
+                'Nome': .4,
+                'Telefone': .15,
+                'E-mail': .35,                
+            },
+            colunas=banco.show_all_clientes()[self.cliente_start:self.cliente_end] \
+                if busca == None else busca[self.cliente_start:self.cliente_end]
+        )
 
         # BOTÃO EDITAR
         btn_procura = Button(
@@ -142,6 +267,28 @@ class App:
             font="Helvetica 9 bold",
             borderwidth=0
             ).place(x=220, y=440, w=200)
+
+        btn_prev = Button(
+            self.master,
+            text="<<<",
+            bg=self.bgButtonEdit,
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0,
+            command=pagina_contatos_anterior,
+        )
+        btn_prev.place(x=530, y=440, w=40)
+
+        btn_next = Button(
+            self.master,
+            text=">>>",
+            bg=self.bgButtonEdit,
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0,
+            command=pagina_contatos_proxima
+        )
+        btn_next.place(x=580, y=440, w=40)
 
     def produtos(self):
         self.limpaTela()
@@ -173,8 +320,8 @@ class App:
             fg=self.fgPadrao).place(x=20, y=140)
 
         cat = StringVar()
-        CATEGORIAS = [CAT[1] for CAT in banco.show_all_categorias()]
-        CATEGORIAS.append('SEM CATEGORIAS') if len(CATEGORIAS) == 0 else print("OK")    
+        CATEGORIAS = [ c['nome'].upper() for c in banco.show_all_categorias() ]
+        CATEGORIAS.append(None) if len(CATEGORIAS) == 0 else print()
         ent_categoria = OptionMenu(
             self.master,
             cat,
@@ -238,12 +385,32 @@ class App:
             borderwidth=0
             ).place(x=220, y=220, w=200)
 
-        # LISTBOX
-        listbox = Listbox(
-            self.master,
-            borderwidth=2)
-        listbox.config(height=10)
-        listbox.place(x=20, y=260, w=600)
+        # LISTBOX        
+        tabela = Tabela(
+            frame=self.master, 
+            posx=20,
+            posy=260,
+            colunas=[
+                {
+                'ID': 1,
+                'Produto': 'Refrigerante Mantiqueira',
+                'Seção': 'Bebidas',
+                'Estoque': 20,
+                'Unidade': 'Unid',
+                'Custo': 2.99,
+                'Preço': 5.00,
+                }
+            ],
+            header={
+                'ID': .1,
+                'Produto': .4,
+                'Seção': .1,
+                'Estoque': .1,
+                'Unidade': .1,
+                'Custo': .1,
+                'Preço': .1,
+            }
+        )
 
         # BOTÃO EDITAR
         btn_procura = Button(
@@ -255,10 +422,32 @@ class App:
             borderwidth=0,            
             ).place(x=220, y=440, w=200)
 
-    def categorias(self):
+    def categorias(self, busca=None):
         def cria_categoria():
-            banco.create_categoria(nome=ent_nome.get(), user=user)
-            self.produtos()
+            banco.create_categoria(nome=ent_nome.get(), user=user)  
+            self.categorias()
+            
+        def pagina_categorias_proxima():
+            if self.categoria_end <= len(banco.show_all_categorias()):
+                self.categoria_start += 11
+                self.categoria_end += 11
+                self.categorias()
+            else:
+                btn_next["state"] = DISABLED
+                btn_next["bg"] = "#cccccc"
+
+        def pagina_categorias_anterior():
+            if self.categoria_start >= 11:
+                self.categoria_start -= 11
+                self.categoria_end -= 11
+                self.categorias()            
+            else:
+                btn_prev["state"] = DISABLED
+                btn_prev["bg"] = "#cccccc"
+
+        def busca_categoria():            
+            busca = banco.busca_categoria(ent_nome.get())
+            self.categorias(busca)
             
         self.limpaTela()
         self.criaTitulo("Cadastro de Seções")
@@ -279,7 +468,8 @@ class App:
             bg=self.bgButtonSearch,
             fg="#cccccc",
             font="Helvetica 9 bold",
-            borderwidth=0
+            borderwidth=0,
+            command=busca_categoria
             ).place(x=550, y=100, w=50, h=20)        
     
         # BOTÃO CONFIRMA
@@ -293,12 +483,17 @@ class App:
             command=cria_categoria
             ).place(x=220, y=140, w=200)
 
-        # LISTBOX
-        listbox = Listbox(
-            self.master,
-            borderwidth=2)
-        listbox.config(height=15)
-        listbox.place(x=20, y=180, w=600)
+        # TABELA
+        tabela = Tabela(
+            frame=self.master, 
+            posx=20,
+            posy=180,
+            header={
+                'ID': .1,
+                'Seção': .9,
+            },
+            colunas = banco.show_all_categorias()[self.categoria_start:self.categoria_end] if busca == None else busca[self.categoria_start:self.categoria_end]
+        )
 
         # BOTÃO EDITAR
         btn_procura = Button(
@@ -309,6 +504,28 @@ class App:
             font="Helvetica 9 bold",
             borderwidth=0
             ).place(x=220, y=440, w=200)
+
+        btn_prev = Button(
+            self.master,
+            text="<<<",
+            bg=self.bgButtonEdit,
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0,
+            command=pagina_categorias_anterior,
+        )
+        btn_prev.place(x=530, y=440, w=40)
+
+        btn_next = Button(
+            self.master,
+            text=">>>",
+            bg=self.bgButtonEdit,
+            fg="#cccccc",
+            font="Helvetica 9 bold",
+            borderwidth=0,
+            command=pagina_categorias_proxima
+        )
+        btn_next.place(x=580, y=440, w=40)            
 
     def estoques(self):
         self.limpaTela()
@@ -333,12 +550,32 @@ class App:
         ent_categoria["anchor"]="w"
         ent_categoria.place(x=100, y=100, w=500, h=20)
 
-        # LISTBOX
-        listbox = Listbox(
-            self.master,
-            borderwidth=2)
-        listbox.config(height=20)
-        listbox.place(x=20, y=140, w=600)
+        # TABELA
+        tabela = Tabela(
+            frame=self.master, 
+            posx=20,
+            posy=140,
+            header={
+                'ID': .1,
+                'Produto': .3,
+                'Seção': .2,
+                'Estoque': .1,
+                'Unidade': .1,
+                'Custo': .1,
+                'Preço': .1,
+            },
+            colunas=[
+                {
+                'ID': 1,
+                'Produto': 'Refrigerante Mantiqueira',
+                'Seção': 'Bebidas',
+                'Estoque': 20,
+                'Unidade': 'Unid',
+                'Custo': 2.99,
+                'Preço': 5.00,
+                }
+            ],
+        )
 
     def vendas(self):
         self.limpaTela()
@@ -464,7 +701,7 @@ class App:
             bg=self.bgPadrao,
             fg=self.fgPadrao).pack()
 
-        img = PhotoImage(file="../imagens/python.png")
+        img = PhotoImage(file="./imagens/python.png")
         logo = Label(
             self.master,            
             image=img,            

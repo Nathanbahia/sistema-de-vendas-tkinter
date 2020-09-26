@@ -1,12 +1,64 @@
-from classes import Categoria
 from datetime import datetime
+import re
 import sqlite3
 
 
 class Banco:
     def __init__(self):
-        self.conn = sqlite3.connect("../database/bancodedados.db")
+        self.conn = sqlite3.connect("./database/bancodedados.db")
         self.cursor = self.conn.cursor()
+
+    # CLIENTES
+    def create_table_clientes(self):
+        """
+        Função que cria a tabela de clientes nos banco de dados
+        caso ainda não exista quando este arquivo for executado.
+        """
+        query = """
+        CREATE TABLE IF NOT EXISTS clientes (
+            id INTEGER PRIMARY KEY,
+            nome TEXT NOT NULL,
+            telefone TEXT NOT NULL,
+            email TEXT NOT NULL,
+            endereco TEXT NOT NULL            
+        )
+        """
+        self.cursor.execute(query)
+        self.conn.commit()
+        print("Tabela de clientes criada com sucesso!")
+
+    def create_cliente(self, nome, telefone, email, endereco):
+        query = f"""
+        INSERT INTO clientes (nome, telefone, email, endereco)
+        VALUES ('{nome}','{telefone}','{email}','{endereco}')
+        """
+        self.cursor.execute(query)
+        self.conn.commit()
+        print(f"Cliente {nome} cadastrado com sucesso!")
+
+    def busca_cliente(self, nome):
+        query = "SELECT * FROM clientes"
+        clientes = [ 
+            {
+                'id': c[0],
+                'nome': c[1],
+                'telefone': c[2],
+                'email': c[3]
+            } for c in self.cursor.execute(query).fetchall() if re.findall(nome, c[1].upper())]
+        return clientes
+
+    def show_all_clientes(self):
+        query = "SELECT * FROM clientes"
+        clientes = [ 
+            {
+                'id': c[0],
+                'nome': c[1],
+                'telefone': c[2],
+                'email': c[3]
+            } for c in  self.cursor.execute(query).fetchall() 
+        ]
+        return clientes
+
 
     # CATERORIAS
     def create_table_categorias(self):
@@ -14,7 +66,6 @@ class Banco:
         Função que cria a tabela de categorias nos banco de dados
         caso ainda não exista quando este arquivo for executado.
         """
-
         query = """
         CREATE TABLE IF NOT EXISTS categorias (
             id INTEGER PRIMARY KEY,
@@ -28,25 +79,12 @@ class Banco:
         """
         self.cursor.execute(query)
         self.conn.commit()
-        print("Tabela de categorias criada com sucesso!")
-
-    def show_all_categorias(self):
-        """
-        Função que exibe todas as categorias cadastradas no bando de dados
-        """
-        lista_categorias = []
-        query = "SELECT * FROM categorias WHERE ativa=1"
-        categorias = self.cursor.execute(query)                
-        for cat in categorias.fetchall():
-            indice, nome, criacao, alteracao = cat[:4]
-            lista_categorias.append((indice, nome, criacao, alteracao))            
-        return lista_categorias
+        print("Tabela de categorias criada com sucesso!")    
 
     def create_categoria(self, nome, user):
         """
         Função que cria um novo registro de categoria no banco de dados
-        """        
-        secao = Categoria(nome=nome, usuario=user)
+        """                
         query = f"INSERT INTO categorias (nome, criacao, alteracao, criador, alterador, \
 ativa) VALUES ('{secao.nome}', '{secao.criacao}', '{secao.alteracao}', '{secao.usuario}', \
 '{secao.usuario}', 1)"        
@@ -55,28 +93,33 @@ ativa) VALUES ('{secao.nome}', '{secao.criacao}', '{secao.alteracao}', '{secao.u
         self.conn.commit()
         print(f"Seção {nome} criada com sucesso!")
 
-    def select_categoria(self):
+    def show_all_categorias(self):
         """
-        Função que exibe todas as categorias registradas no banco de dados
-        e retorna a categoria selecionada através do índice
+        Função que exibe todas as categorias cadastradas no bando de dados
         """
-        print("\nTodas categorias cadastradas: \n")
-        self.show_all_categorias()
-        indice = int(input("Digite o índice da categoria desejada: "))
-        query = f"SELECT * FROM categorias WHERE id={indice}"
-        cat = self.cursor.execute(query).fetchone()
-        indice = cat[0]
-        secao = Categoria(nome=cat[1], usuario=cat[4])
-        secao.criacao = cat[2]
-        secao.alteracao = cat[3]
-        print(indice, secao)
-        return indice
+        query = "SELECT * FROM categorias WHERE ativa=1"
+        categorias = [
+            {
+                'id': c[0],
+                'nome': c[1]
+            } for c in self.cursor.execute(query).fetchall()
+        ]               
+        return categorias        
+
+    def busca_categoria(self, nome):        
+        query = "SELECT * FROM categorias"
+        retorno = self.cursor.execute(query)
+        categorias = [{
+                'id': c[0],
+                'nome': c[1]
+            } for c in retorno.fetchall() if re.findall(nome, c[1].upper())]
+        return categorias
+
 
     def edit_categoria(self, user):        
         """
         Função que altera nome de categoria já registrada no banco de dados
         """
-
         indice = self.select_categoria()
         nome = input("[ATUALIZAÇÃO] Digite o nome da seção: ")
         data = datetime.now().date()
@@ -85,17 +128,6 @@ alterador='{user}' WHERE id = {indice}"
         self.cursor.execute(query)
         self.conn.commit()
         print("Seção atualizada com sucesso!")
-
-    def delete_categoria(self, user):
-        """
-        Função que deleta registro do banco de dados
-        """
-
-        indice = self.select_categoria()        
-        query = f"UPDATE categorias SET ativa=0, alterador='{user}' WHERE id = {indice}"
-        self.cursor.execute(query)
-        self.conn.commit()
-        print("Seção removida com sucesso!")
 
     # PRODUTO
     def create_table_produtos(self):
@@ -135,5 +167,6 @@ alteracao, criador, alterador, ativa) VALUES ('{nome}', '{categoria}', {quantida
 
 if __name__ == "__main__":
     banco = Banco()
+    banco.create_table_clientes()
     banco.create_table_categorias()
     banco.create_table_produtos()
