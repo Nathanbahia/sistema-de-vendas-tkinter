@@ -1,4 +1,5 @@
 from datetime import datetime
+from classes import Categoria
 import re
 import sqlite3
 
@@ -55,12 +56,12 @@ class Banco:
                 'nome': c[1],
                 'telefone': c[2],
                 'email': c[3]
-            } for c in  self.cursor.execute(query).fetchall() 
+            } for c in self.cursor.execute(query).fetchall()
         ]
         return clientes
 
+    # CATERORIAS    
 
-    # CATERORIAS
     def create_table_categorias(self):
         """
         Função que cria a tabela de categorias nos banco de dados
@@ -84,7 +85,8 @@ class Banco:
     def create_categoria(self, nome, user):
         """
         Função que cria um novo registro de categoria no banco de dados
-        """                
+        """
+        secao = Categoria(nome=nome, user=user)
         query = f"INSERT INTO categorias (nome, criacao, alteracao, criador, alterador, \
 ativa) VALUES ('{secao.nome}', '{secao.criacao}', '{secao.alteracao}', '{secao.usuario}', \
 '{secao.usuario}', 1)"        
