@@ -117,7 +117,6 @@ ativa) VALUES ('{secao.nome}', '{secao.criacao}', '{secao.alteracao}', '{secao.u
             } for c in retorno.fetchall() if re.findall(nome, c[1].upper())]
         return categorias
 
-
     def edit_categoria(self, user):        
         """
         Função que altera nome de categoria já registrada no banco de dados
