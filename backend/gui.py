@@ -159,7 +159,7 @@ class App:
             text="Nome: ",
             bg=self.bgPadrao,
             fg=self.fgPadrao,
-            font=self.fontePadrao).place(x=270, y=100),                   
+            font=self.fontePadrao).place(x=270, y=100)
         ent_nome = Entry(self.master, font=self.fontePadrao)
         ent_nome.place(x=350, y=100, w=840, h=25)
 
@@ -217,7 +217,6 @@ class App:
             highlightcolor="#ffffff",
             relief=GROOVE,
             underline=10,
-
             command=create_cliente,
             ).place(x=1050, y=200, w=200, h=25)
 
