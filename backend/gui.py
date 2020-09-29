@@ -144,15 +144,24 @@ class App:
         self.limpaTela()
         self.criaTitulo("Cadastro de Clientes")
 
+        # LOGO
+        img = PhotoImage(file="./imagens/python.png")
+        logo = Label(
+            self.master,            
+            image=img,            
+            bg=self.bgPadrao)
+        logo.image = img
+        logo.place(x=20, y=40)
+
         # NOME
         Label(
             self.master,
             text="Nome: ",
             bg=self.bgPadrao,
             fg=self.fgPadrao,
-            font=self.fontePadrao).place(x=20, y=100),                   
+            font=self.fontePadrao).place(x=270, y=100),                   
         ent_nome = Entry(self.master, font=self.fontePadrao)
-        ent_nome.place(x=100, y=100, w=1090, h=25)
+        ent_nome.place(x=350, y=100, w=840, h=25)
 
         # BOTÃO PROCURA
         btn_procura = Button(
@@ -172,9 +181,9 @@ class App:
             text="Endereço: ",
             bg=self.bgPadrao,
             font=self.fontePadrao,     
-            fg=self.fgPadrao).place(x=20, y=150)
+            fg=self.fgPadrao).place(x=270, y=150)
         ent_endereco = Entry(self.master, font=self.fontePadrao)
-        ent_endereco.place(x=100, y=150, w=860, h=25)        
+        ent_endereco.place(x=350, y=150, w=900, h=25)        
 
         # TELEFONE        
         Label(
@@ -182,9 +191,9 @@ class App:
             text="Telefone: ",
             bg=self.bgPadrao,
             font=self.fontePadrao,     
-            fg=self.fgPadrao).place(x=20, y=200)
+            fg=self.fgPadrao).place(x=270, y=200)
         ent_telefone = Entry(self.master, font=self.fontePadrao)
-        ent_telefone.place(x=100, y=200, w=200, h=25)
+        ent_telefone.place(x=350, y=200, w=300, h=25)
 
         # EMAIL
         Label(
@@ -192,9 +201,9 @@ class App:
             text="E-mail: ",
             bg=self.bgPadrao,
             font=self.fontePadrao,
-            fg=self.fgPadrao).place(x=20, y=250)
+            fg=self.fgPadrao).place(x=660, y=200)
         ent_email = Entry(self.master, font=self.fontePadrao)
-        ent_email.place(x=100, y=250, w=200, h=25)              
+        ent_email.place(x=740, y=200, w=300, h=25)              
 
         # BOTÃO CONFIRMA
         btn_confirma = Button(
@@ -203,15 +212,20 @@ class App:
             bg=self.bgButtonConfirm,
             fg="#cccccc",
             font="Helvetica 12 bold",
-            borderwidth=0,
+            borderwidth=1,            
+            highlightbackground="#cccccc",
+            highlightcolor="#ffffff",
+            relief=GROOVE,
+            underline=10,
+
             command=create_cliente,
-            ).place(x=20, y=300, w=200, h=40)
+            ).place(x=1050, y=200, w=200, h=25)
 
         # TABELA 
         tabela = Tabela(
             frame=self.master,
             posx=20,
-            posy=360,            
+            posy=300,            
             header={
                 'ID': 10,
                 'Nome': 40,
