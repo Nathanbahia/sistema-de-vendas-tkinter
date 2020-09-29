@@ -1,7 +1,6 @@
 from datetime import datetime
-from classes import Categoria
-import re
 import sqlite3
+import re
 
 
 class Banco:
@@ -44,7 +43,8 @@ class Banco:
                 'id': c[0],
                 'nome': c[1],
                 'telefone': c[2],
-                'email': c[3]
+                'email': c[3],
+                'endereco': c[4],
             } for c in self.cursor.execute(query).fetchall() if re.findall(nome, c[1].upper())]
         return clientes
 
@@ -55,7 +55,8 @@ class Banco:
                 'id': c[0],
                 'nome': c[1],
                 'telefone': c[2],
-                'email': c[3]
+                'email': c[3],
+                'endereco': c[4],
             } for c in self.cursor.execute(query).fetchall()
         ]
         return clientes
@@ -70,26 +71,18 @@ class Banco:
         query = """
         CREATE TABLE IF NOT EXISTS categorias (
             id INTEGER PRIMARY KEY,
-            nome TEXT NOT NULL,
-            criacao TEXT NOT NULL,
-            alteracao TEXT NOT NULL,
-            criador TEXT NOT NULL,
-            alterador TEXT NOT NULL,
-            ativa INTEGER NOT NULL
+            nome TEXT NOT NULL
         )
         """
         self.cursor.execute(query)
         self.conn.commit()
         print("Tabela de categorias criada com sucesso!")    
 
-    def create_categoria(self, nome, user):
+    def create_categoria(self, nome):
         """
         Função que cria um novo registro de categoria no banco de dados
-        """
-        secao = Categoria(nome=nome, user=user)
-        query = f"INSERT INTO categorias (nome, criacao, alteracao, criador, alterador, \
-ativa) VALUES ('{secao.nome}', '{secao.criacao}', '{secao.alteracao}', '{secao.usuario}', \
-'{secao.usuario}', 1)"        
+        """        
+        query = f"INSERT INTO categorias (nome) VALUES ('{nome}')"
 
         self.cursor.execute(query)
         self.conn.commit()
@@ -99,7 +92,7 @@ ativa) VALUES ('{secao.nome}', '{secao.criacao}', '{secao.alteracao}', '{secao.u
         """
         Função que exibe todas as categorias cadastradas no bando de dados
         """
-        query = "SELECT * FROM categorias WHERE ativa=1"
+        query = "SELECT * FROM categorias"
         categorias = [
             {
                 'id': c[0],
@@ -142,28 +135,36 @@ alterador='{user}' WHERE id = {indice}"
             nome TEXT NOT NULL,
             categoria TEXT NOT NULL,
             quantidade REAL NOT NULL,
-            unidade TEXT NOT NULL,            
-            criacao TEXT NOT NULL,
-            alteracao TEXT NOT NULL,
-            criador TEXT NOT NULL,
-            alterador TEXT NOT NULL,
-            ativa INTEGER NOT NULL
+            unidade TEXT NOT NULL
         )
         """
         self.cursor.execute(query)
         self.conn.commit()
         print("Tabela de produtos criada com sucesso!")
 
-    def create_produto(self, nome, categoria, quantidade, unidade, usuario):
-        data = datetime.now().date()
+    def create_produto(self, nome, categoria, quantidade, unidade):    
         query = f"""
-        INSERT INTO produtos (nome, categoria, quantidade, unidade, criacao, \
-alteracao, criador, alterador, ativa) VALUES ('{nome}', '{categoria}', {quantidade}, \
-'{unidade}', '{data}', '{data}', '{usuario}', '{usuario}', 1)        
-        """
+        INSERT INTO produtos (nome, categoria, quantidade, unidade) \
+            VALUES ('{nome}', '{categoria}', {quantidade}, '{unidade}')"""
         self.cursor.execute(query)
         self.conn.commit()
         print(f"Produto {nome} cadastrado com sucesso!")
+
+    def show_all_produtos(self):
+        """
+        Função que exibe todas os produtos cadastrados no bando de dados
+        """
+        query = "SELECT * FROM produtos"            
+        produtos = [
+            {
+                'id': p[0],
+                'nome': p[1],
+                'seção': p[2],
+                'estoque': p[3],
+                'unidade': p[4]
+            } for p in self.cursor.execute(query).fetchall()
+        ]               
+        return produtos
         
 
 if __name__ == "__main__":
