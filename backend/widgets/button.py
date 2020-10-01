@@ -3,7 +3,7 @@ from tkinter import *
 
 class MyButton:
     def __init__(self, frame, texto, x, y, command=None, largura=50, \
-        altura=25, cor="#000000", fundo="#cccccc", tam_fonte=12):
+        altura=25, cor="#000000", fundo="#cc8000", tam_fonte=12):
 
         self.button = Button(
             frame,

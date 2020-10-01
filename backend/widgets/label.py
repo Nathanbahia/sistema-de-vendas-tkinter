@@ -2,7 +2,7 @@ from tkinter import *
 
 
 class MyLabel:
-    def __init__(self, frame, texto, x, y, cor="#000000", fundo="#484848", \
+    def __init__(self, frame, texto, x, y, cor="#000000", fundo="#1546ff", \
         font_size=12, largura=None, altura=None):
 
         self.label = Label(

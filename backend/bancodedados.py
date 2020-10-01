@@ -5,15 +5,15 @@ import re
 
 class Banco:
     def __init__(self):
-        self.conn = sqlite3.connect("./database/bancodedados.db")
+        try:
+            self.conn = sqlite3.connect("./database/bancodedados.db")
+        except:
+            self.conn = sqlite3.connect("../database/bancodedados.db")
         self.cursor = self.conn.cursor()
 
     # CLIENTES
+
     def create_table_clientes(self):
-        """
-        Função que cria a tabela de clientes nos banco de dados
-        caso ainda não exista quando este arquivo for executado.
-        """
         query = """
         CREATE TABLE IF NOT EXISTS clientes (
             id INTEGER PRIMARY KEY,
@@ -64,34 +64,23 @@ class Banco:
     # CATERORIAS    
 
     def create_table_categorias(self):
-        """
-        Função que cria a tabela de categorias nos banco de dados
-        caso ainda não exista quando este arquivo for executado.
-        """
         query = """
-        CREATE TABLE IF NOT EXISTS categorias (
-            id INTEGER PRIMARY KEY,
-            nome TEXT NOT NULL
-        )
-        """
+            CREATE TABLE IF NOT EXISTS categorias (
+                id INTEGER PRIMARY KEY,
+                nome TEXT NOT NULL
+            )
+            """
         self.cursor.execute(query)
         self.conn.commit()
         print("Tabela de categorias criada com sucesso!")    
 
-    def create_categoria(self, nome):
-        """
-        Função que cria um novo registro de categoria no banco de dados
-        """        
+    def create_categoria(self, nome):       
         query = f"INSERT INTO categorias (nome) VALUES ('{nome}')"
-
         self.cursor.execute(query)
         self.conn.commit()
         print(f"Seção {nome} criada com sucesso!")
 
     def show_all_categorias(self):
-        """
-        Função que exibe todas as categorias cadastradas no bando de dados
-        """
         query = "SELECT * FROM categorias"
         categorias = [
             {
@@ -110,25 +99,9 @@ class Banco:
             } for c in retorno.fetchall() if re.findall(nome, c[1].upper())]
         return categorias
 
-    def edit_categoria(self, user):        
-        """
-        Função que altera nome de categoria já registrada no banco de dados
-        """
-        indice = self.select_categoria()
-        nome = input("[ATUALIZAÇÃO] Digite o nome da seção: ")
-        data = datetime.now().date()
-        query = f"UPDATE categorias SET nome='{nome}', alteracao='{data}', \
-alterador='{user}' WHERE id = {indice}"
-        self.cursor.execute(query)
-        self.conn.commit()
-        print("Seção atualizada com sucesso!")
-
     # PRODUTO
+
     def create_table_produtos(self):
-        """
-        Função que cria a tabela de produtos nos banco de dados
-        caso ainda não exista quando este arquivo for executado.
-        """
         query = """
         CREATE TABLE IF NOT EXISTS produtos (
             id INTEGER PRIMARY KEY,
@@ -150,10 +123,19 @@ alterador='{user}' WHERE id = {indice}"
         self.conn.commit()
         print(f"Produto {nome} cadastrado com sucesso!")
 
+    def busca_produto(self, nome):        
+        query = "SELECT * FROM produtos"
+        retorno = self.cursor.execute(query)
+        produtos = [{
+                'id': p[0],
+                'nome': p[1],
+                'seção': p[2],
+                'estoque': p[3],
+                'unidade': p[4]
+            } for p in retorno.fetchall() if re.findall(nome, p[1].upper())]
+        return produtos        
+
     def show_all_produtos(self):
-        """
-        Função que exibe todas os produtos cadastrados no bando de dados
-        """
         query = "SELECT * FROM produtos"            
         produtos = [
             {

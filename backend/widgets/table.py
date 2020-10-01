@@ -3,7 +3,7 @@ from tkinter import *
 
 class MyTable:
     def __init__(self, frame, posx, posy, colunas, header):        
-        largura_total = 1280
+        largura_total = frame.winfo_screenwidth() - 120
         larg_colunas = []
 
         table = Frame(frame)
@@ -63,6 +63,6 @@ class MyTable:
             ).pack(side=LEFT)
             cont.pack()                       
 
-        table.place(x=posx, y=posy, w=largura_total, h=700-(posy+50))
+        table.place(x=posx, y=posy, w=largura_total, h=700-(posy+10))
         canvas.pack(side="left", fill="both", expand=True)
         scroll.pack(side="right", fill="y")  
