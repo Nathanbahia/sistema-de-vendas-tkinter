@@ -1,67 +1,15 @@
 from tkinter import *
 from classes import *
 from bancodedados import *
+from widgets.table import MyTable
+from widgets.label import MyLabel
+from widgets.entry import MyEntry
+from widgets.button import MyButton
+from widgets.option import MyOption
 
 
 banco = Banco()
 
-
-class Tabela:
-    def __init__(self, frame, posx, posy, colunas, header):        
-        largura_total = 1240
-        larg_colunas = []
-
-        table = Frame(frame)
-        canvas = Canvas(table)
-        scroll = Scrollbar(table, orient="vertical", command=canvas.yview)
-        scroll_frame = Frame(canvas)
-
-        scroll_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(
-                scrollregion=canvas.bbox("all")
-            )
-        )
-
-        canvas.create_window((0, 0), window=scroll_frame, anchor=NW)
-        canvas.configure(yscrollcommand=scroll.set)
-
-        # CABEÇALHO        
-        container_head = Frame(frame)
-        for h in header:
-            Label(
-                container_head,
-                text=h.upper(),
-                bg="#FF8000", 
-                anchor=W,
-                font="Helvetica 10",
-                padx=5,
-                width=header[h]
-            ).pack(side=LEFT, fill=BOTH)            
-            larg_colunas.append(header[h])
-        container_head.place(x=posx, y=posy, w=largura_total)
-                        
-        for elemento in colunas:
-            indice = 0
-            x = posx
-            cont = Frame(scroll_frame)            
-            for dados in elemento:                
-                Label(
-                    cont,
-                    text=str(elemento[dados]).upper(),
-                    borderwidth=1,
-                    relief="groove",                      
-                    anchor=W,
-                    font="Helvetica 10",
-                    padx=5,
-                    width=larg_colunas[indice]
-                ).pack(side=LEFT, fill=BOTH)
-                indice += 1
-            cont.pack()                       
-
-        table.place(x=posx, y=posy, w=largura_total, h=700-posy)
-        canvas.pack(side="left", fill="both", expand=True)
-        scroll.pack(side="right", fill="y")       
 
 class App:    
     def __init__(self):
@@ -75,6 +23,7 @@ class App:
         self.bgButtonConfirm = "#115293"
         self.bgButtonSearch = "#d32f2f"
         self.bgButtonEdit = "#388e3c"
+        self.bgButtonCancel = "#dd8000"
 
         self.width = 1280
         self.height = 730
@@ -126,6 +75,17 @@ class App:
             fg=self.fgPadrao,
             font="Helvetica 16 bold").place(x=0, y=50, w=self.width)
 
+        # LOGO
+        img = PhotoImage(file="./imagens/python.png")
+        logo = Label(
+            self.master,            
+            image=img,            
+            bg=self.bgPadrao)
+        logo.image = img
+        logo.place(x=20, y=20)
+
+
+
     def clientes(self, busca=None):
         def create_cliente():
             banco.create_cliente(
@@ -143,94 +103,37 @@ class App:
 
         self.limpaTela()
         self.criaTitulo("Cadastro de Clientes")
+        
+        MyLabel(frame=self.master, texto="Nome: ", fundo=self.bgPadrao, \
+            x=270, y=100)        
+        nome = MyEntry(frame=self.master, x=380, y=100, largura=800)
+        
+        MyButton(frame=self.master, texto="Buscar", command=busca_cliente, \
+            x=1190, y=100, largura=70)
 
-        # LOGO
-        img = PhotoImage(file="./imagens/python.png")
-        logo = Label(
-            self.master,            
-            image=img,            
-            bg=self.bgPadrao)
-        logo.image = img
-        logo.place(x=20, y=40)
+        MyLabel(frame=self.master, texto="Endereço: ", fundo=self.bgPadrao, \
+            x=270, y=140)  
+        endereco = MyEntry(frame=self.master, x=380, y=140, largura=880)              
 
-        # NOME
-        Label(
-            self.master,
-            text="Nome: ",
-            bg=self.bgPadrao,
-            fg=self.fgPadrao,
-            font=self.fontePadrao).place(x=270, y=100)
-        ent_nome = Entry(self.master, font=self.fontePadrao)
-        ent_nome.place(x=350, y=100, w=840, h=25)
+        MyLabel(frame=self.master, texto="Telefone: ", fundo=self.bgPadrao, \
+            x=270, y=180)  
+        telefone = MyEntry(frame=self.master, x=380, y=180, largura=300)                  
 
-        # BOTÃO PROCURA
-        btn_procura = Button(
-            self.master,
-            text="Buscar",
-            bg=self.bgButtonSearch,
-            fg="#cccccc",
-            font="Helvetica 9 bold",
-            borderwidth=0,
-            command=busca_cliente
-            )
-        btn_procura.place(x=1200, y=100, w=50, h=25)        
-
-        # ENDEREÇO
-        Label(
-            self.master,
-            text="Endereço: ",
-            bg=self.bgPadrao,
-            font=self.fontePadrao,     
-            fg=self.fgPadrao).place(x=270, y=150)
-        ent_endereco = Entry(self.master, font=self.fontePadrao)
-        ent_endereco.place(x=350, y=150, w=900, h=25)        
-
-        # TELEFONE        
-        Label(
-            self.master,
-            text="Telefone: ",
-            bg=self.bgPadrao,
-            font=self.fontePadrao,     
-            fg=self.fgPadrao).place(x=270, y=200)
-        ent_telefone = Entry(self.master, font=self.fontePadrao)
-        ent_telefone.place(x=350, y=200, w=300, h=25)
-
-        # EMAIL
-        Label(
-            self.master,
-            text="E-mail: ",
-            bg=self.bgPadrao,
-            font=self.fontePadrao,
-            fg=self.fgPadrao).place(x=660, y=200)
-        ent_email = Entry(self.master, font=self.fontePadrao)
-        ent_email.place(x=740, y=200, w=300, h=25)              
-
-        # BOTÃO CONFIRMA
-        btn_confirma = Button(
-            self.master,
-            text="Cadastrar",
-            bg=self.bgButtonConfirm,
-            fg="#cccccc",
-            font="Helvetica 12 bold",
-            borderwidth=1,            
-            highlightbackground="#cccccc",
-            highlightcolor="#ffffff",
-            relief=GROOVE,
-            underline=10,
-            command=create_cliente,
-            ).place(x=1050, y=200, w=200, h=25)
-
-        # TABELA 
-        tabela = Tabela(
-            frame=self.master,
-            posx=20,
-            posy=300,            
+        MyLabel(frame=self.master, texto="E-mail: ", fundo=self.bgPadrao, \
+            x=690, y=180)  
+        email = MyEntry(frame=self.master, x=780, y=180, largura=300)              
+          
+        MyButton(frame=self.master, texto="Cadastrar", fundo=self.bgButtonConfirm, \
+            x=1090, y=180, largura=170, command=create_cliente)            
+        
+        tabela = MyTable(frame=self.master, posx=20, posy=300,            
             header={
                 'ID': 10,
                 'Nome': 40,
                 'Telefone': 20,
                 'E-mail': 25,
-                'Endereço': 60                
+                'Endereço': 40,
+                'Selecionar': 15,
             },
             colunas=banco.show_all_clientes() if busca == None else busca
         )               
@@ -238,116 +141,47 @@ class App:
     def produtos(self):
         def create_produto():
             banco.create_produto(
-                nome=ent_nome.get(),
-                categoria=cat.get(),
-                quantidade=ent_quantidade.get(),
-                unidade=uni.get()
+                nome=nome.entry.get(),
+                categoria=categoria.var.get(),
+                quantidade=quantidade.entry.get(),
+                unidade=unidade.var.get()
             )
             self.produtos()
 
         self.limpaTela()
         self.criaTitulo("Cadastro de Produtos")
+        
 
-        # NOME
-        Label(
-            self.master,
-            text="Nome: ",
-            bg=self.bgPadrao,
-            fg=self.fgPadrao).place(x=20, y=100)
-        ent_nome = Entry(self.master)
-        ent_nome.place(x=100, y=100, w=440)
+        MyLabel(frame=self.master, texto="Nome: ", fundo=self.bgPadrao, x=270, y=100)
+        nome = MyEntry(frame=self.master, x=380, y=100, largura=800)
+        
+        MyButton(frame=self.master, texto="Buscar", x=1190, y=100, largura=70, \
+            command=lambda: print("clicado."))
+        
+        MyLabel(frame=self.master, texto="Categoria: ", fundo=self.bgPadrao, x=270, y=140)
 
-        # BOTÃO PROCURA
-        btn_procura = Button(
-            self.master,
-            text="Buscar",
-            bg=self.bgButtonSearch,
-            fg="#cccccc",
-            font="Helvetica 9 bold",
-            borderwidth=0
-            ).place(x=550, y=100, w=50, h=20)       
+        CAT = [ c['nome'].upper() for c in banco.show_all_categorias() ]
+        CAT.append(None) if len(CAT) == 0 else CAT
+        categoria = MyOption(frame=self.master, opcoes= CAT, x=380, y=140, largura=200)        
 
-        # CATEGORIA
-        Label(
-            self.master,
-            text="Categoria: ",
-            bg=self.bgPadrao,
-            fg=self.fgPadrao).place(x=20, y=140)
+        MyButton(frame=self.master, texto="+", x=590, y=140, command=self.categorias)
+        
+        MyLabel(frame=self.master, texto="Unidade: ", fundo=self.bgPadrao, x=650, y=140)
 
-        cat = StringVar()
-        CATEGORIAS = [ c['nome'].upper() for c in banco.show_all_categorias() ]
-        CATEGORIAS.append(None) if len(CATEGORIAS) == 0 else print()
-        ent_categoria = OptionMenu(
-            self.master,
-            cat,
-            *CATEGORIAS,            
-            )
-        ent_categoria["highlightthickness"]=0
-        ent_categoria["borderwidth"]=0
-        ent_categoria["anchor"]="w"
-        ent_categoria.place(x=100, y=140, w=150, h=20)
-
-        # BOTÃO ADICIONAR SEÇÃO
-        Button(
-            self.master,
-            text="+",
-            bg=self.bgButtonConfirm,
-            fg="#FFFFFF",
-            borderwidth=0,
-            command=self.categorias).place(x=260, y=140, w=40, h=20)        
-
-        # UNIDADE
-        uni = StringVar()
-        UNIDADES = ['Unidade', 'Quilo']
-        Label(
-            self.master,
-            text="Unidade: ",
-            bg=self.bgPadrao,
-            fg=self.fgPadrao).place(x=320, y=140)
-        ent_unidade = OptionMenu(
-            self.master,
-            uni,
-            *UNIDADES
-            )
-        ent_unidade["highlightthickness"]=0
-        ent_unidade["borderwidth"]=0
-        ent_unidade["anchor"]="w"
-        ent_unidade.place(x=400, y=140, w=200, h=20)
-
-        # QUANTIDADE
-        Label(
-            self.master,
-            text="Quantidade: ",
-            bg=self.bgPadrao,
-            fg=self.fgPadrao).place(x=20, y=180)
-        ent_quantidade = Entry(self.master)
-        ent_quantidade.place(x=100, y=180, w=200)
-
-        # CUSTO
-        Label(
-            self.master,
-            text="Custo: ",
-            bg=self.bgPadrao,
-            fg=self.fgPadrao).place(x=320, y=180)
-        ent_custo = Entry(self.master)
-        ent_custo.place(x=400, y=180, w=200)        
-
-        # BOTÃO CADASTRO
-        btn_confirma = Button(
-            self.master,
-            text="Cadastrar",
-            bg=self.bgButtonConfirm,
-            fg="#cccccc",
-            font="Helvetica 9 bold",
-            borderwidth=0,
-            command=create_produto,
-            ).place(x=220, y=220, w=200)
+        UNI = ['Unidade', 'Quilo']
+        unidade = MyOption(frame=self.master, opcoes=UNI, x=730, y=140, largura=200)
+        
+        MyLabel(frame=self.master, texto="Quantidade: ", fundo=self.bgPadrao, x=270, y=180)
+        quantidade = MyEntry(frame=self.master, x=380, y=180, largura=200)
+        
+        MyLabel(frame=self.master, texto="Custo: ", fundo=self.bgPadrao, x=650, y=180)
+        custo = MyEntry(frame=self.master, x=730, y=180, largura=200)
+        
+        MyButton(frame=self.master, texto="Cadastrar", x=950, y=180, \
+            largura=100, fundo=self.bgButtonConfirm, command=create_produto)            
 
         # TABELA        
-        tabela = Tabela(
-            frame=self.master, 
-            posx=20,
-            posy=260,
+        tabela = MyTable(frame=self.master, posx=20, posy=300, \
             colunas=banco.show_all_produtos(),
             header={
                 'ID': 10,
@@ -362,7 +196,7 @@ class App:
 
     def categorias(self, busca=None):
         def cria_categoria():
-            banco.create_categoria(nome=ent_nome.get())  
+            banco.create_categoria(nome=nome.entry.get())  
             self.categorias()                
 
         def busca_categoria():            
@@ -372,46 +206,20 @@ class App:
         self.limpaTela()
         self.criaTitulo("Cadastro de Seções")
 
-        # NOME
-        Label(
-            self.master,
-            text="Nome: ",
-            bg=self.bgPadrao,
-            fg=self.fgPadrao).place(x=20, y=100)
-        ent_nome = Entry(self.master)
-        ent_nome.place(x=100, y=100, w=440)
+        MyLabel(frame=self.master, texto="Nome: ", fundo=self.bgPadrao, x=270, y=140)
+        nome = MyEntry(frame=self.master, x=380, y=140, largura=800)
+        
+        MyButton(frame=self.master, texto="Buscar", x=1190, y=140, largura=70, \
+            command=busca_categoria)
 
-        # BOTÃO PROCURA
-        btn_procura = Button(
-            self.master,
-            text="Buscar",
-            bg=self.bgButtonSearch,
-            fg="#cccccc",
-            font="Helvetica 9 bold",
-            borderwidth=0,
-            command=busca_categoria
-            ).place(x=550, y=100, w=50, h=20)        
+        MyButton(frame=self.master, texto="Cancelar", x=380, y=180, \
+            largura=100, fundo=self.bgButtonCancel, command=self.produtos)    
     
-        # BOTÃO CONFIRMA
-        btn_confirma = Button(
-            self.master,
-            text="Cadastrar",
-            bg=self.bgButtonConfirm,
-            fg="#cccccc",
-            font="Helvetica 9 bold",
-            borderwidth=0,
-            command=cria_categoria
-            ).place(x=220, y=140, w=200)
-
-        # TABELA
-        tabela = Tabela(
-            frame=self.master, 
-            posx=20,
-            posy=180,
-            header={
-                'ID': 10,
-                'Seção': 90,
-            },
+        MyButton(frame=self.master, texto="Cadastrar", x=490, y=180, \
+            largura=100, fundo=self.bgButtonConfirm, command=cria_categoria)  
+        
+        MyTable(frame=self.master, posx=20, posy=300,
+            header={'ID': 10, 'Seção': 90},
             colunas = banco.show_all_categorias() if busca == None else busca
         )                       
 
@@ -439,7 +247,7 @@ class App:
         ent_categoria.place(x=100, y=100, w=500, h=20)
 
         # TABELA
-        tabela = Tabela(
+        tabela = MyTable(
             frame=self.master, 
             posx=20,
             posy=140,
